@@ -11,18 +11,47 @@ router.get('/test', (req, res) => {
 })
 
 router.get('/publication/:id', async (req, res) => {
-	const to = ''
-	let string = await rp.get(`${api_root}/_/api/collections/${req.params.id}/stream`)
+	const to = req.query.to
+	let string = await rp.get({
+		uri: `${api_root}/_/api/collections/${req.params.id}/stream`,
+		qs: {
+			to,
+			limit: 1,
+			page: '1'
+		}
+	})
 		.catch(err => console.log(`Error: ${err}`))
 
-	data = JSON.parse(string.split("</x>").pop())
+	const data = JSON.parse(string.split("</x>").pop())
 	// Lets peep the data
 	console.log({data})
 
-	// const postData = data.payload.references.Post
-	// const posts = Object.keys(postData).map(el => postData[el])
+	const postData = data.payload.references.Post
+	const posts = Object.keys(postData).map(el => postData[el])
 
-	res.json(data)
+	// post dates
+	res.json({
+		meta: { count: posts.length },
+		paging: data.payload.paging,
+		posts: posts.map(el => el.slug)
+	})
+})
+
+router.get('/archive', async (req, res) => {
+
+	const to = req.query.to
+	let string = await rp.get(`https://chatbotsmagazine.com/archive?format=json&to=${to}`)
+
+	const data = JSON.parse(string.split("</x>").pop())
+	
+	const postData = data.payload.references.Post
+	const posts = Object.keys(postData).map(el => postData[el])
+
+	res.json({
+		meta: {count: posts.length},
+		paging: data.payload.paging,
+		posts: posts.map(el => el.slug)
+	})
 })
 
 module.exports = router

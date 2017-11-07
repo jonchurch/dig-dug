@@ -1,5 +1,4 @@
 
-const rp = require('request-promise').defaults({json: true})
 const express = require('express') 
 const bodyParser = require('body-parser')
 
