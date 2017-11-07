@@ -1,6 +1,12 @@
 
-const rp = require('request-promise').defaults({json: true, headers: {'Accept': 'application/json'}})
 const router = require('express').Router()
+const cheerio = require('cheerio')
+const Nightmare = require('nightmare')
+const rp = require('request-promise').defaults({
+	transform: (body) => {
+		return cheerio.load(body)
+	}
+})
 
 const api_root = 'https://medium.com'
 
@@ -9,6 +15,27 @@ router.get('/test', (req, res) => {
 
 	res.setStatus(200).send('ok')
 })
+
+
+router.get('/scrape', async (req, res) => {
+	const nightmare = new Nightmare({ show: true})
+	const url = req.query.url || 'https://chatbotsmagazine.com/latest'
+	const $ = await rp(url).catch(err => console.log('Error:', err))
+	
+	await nightmare
+		.goto(url)
+		.wait('.js-postList:last-child')
+		.evaluate(() => {
+			// return [..document.querySelectorAll('')]
+		})
+
+
+
+	
+})
+
+
+// Medium routes, no go for finding most popular posts
 
 router.get('/publication/:id', async (req, res) => {
 	const to = req.query.to
